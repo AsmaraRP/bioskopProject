@@ -20,7 +20,7 @@ module.exports = {
         totalTicket,
         totalPayment,
         paymentMethod,
-        statusPayment: "Active",
+        statusPayment: "succsess",
         createdAt: new Date(Date.now()),
       };
       const result = await bookingModel.createBooking(setData);
