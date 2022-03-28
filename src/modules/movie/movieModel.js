@@ -9,7 +9,7 @@ module.exports = {
           if (!error) {
             resolve(result[0].total);
           } else {
-            reject(new Error(error.sqlMassage));
+            reject(new Error(error));
           }
         }
       );
@@ -17,11 +17,12 @@ module.exports = {
   getAllMovie: (limit, offset, searchName, sort) =>
     new Promise((resolve, reject) => {
       connection.query(
-        `SELECT * FROM movie WHERE name LIKE '%${searchName}%' ORDER BY name ${sort} LIMIT ${limit} OFFSET ${offset}`,
+        `SELECT * FROM movie WHERE name LIKE '%${searchName}%' ORDER BY ${sort} LIMIT ${limit} OFFSET ${offset}`,
         (error, result) => {
           if (!error) {
             resolve(result);
           } else {
+            console.log(error.sqlMassage);
             reject(new Error(error.sqlMassage));
           }
         }

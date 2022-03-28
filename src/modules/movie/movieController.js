@@ -16,6 +16,8 @@ module.exports = {
   getAllMovie: async (request, response) => {
     try {
       let { page, limit } = request.query;
+      page = page || 1;
+      limit = limit || 5;
       page = Number(page);
       limit = Number(limit);
       const offset = page * limit - limit;
@@ -27,7 +29,9 @@ module.exports = {
         limit,
         totalData,
       };
-      const { searchName, sort } = request.query;
+      let { sort, searchName } = request.query;
+      searchName = searchName || "";
+      sort = sort || "id ASC";
       const result = await movieModel.getAllMovie(
         limit,
         offset,
@@ -42,7 +46,7 @@ module.exports = {
         pageInfo
       );
     } catch (error) {
-      //   console.log(error);
+      console.log(error);
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
   },

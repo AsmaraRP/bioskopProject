@@ -17,20 +17,7 @@ module.exports = {
   getAllSchedule: (limit, offset, searchLocation, sort) =>
     new Promise((resolve, reject) => {
       connection.query(
-        `SELECT * FROM schedule WHERE location LIKE '%${searchLocation}%' ORDER BY location ${sort} LIMIT ${limit} OFFSET ${offset}`,
-        (error, result) => {
-          if (!error) {
-            resolve(result);
-          } else {
-            reject(new Error(error.sqlMassage));
-          }
-        }
-      );
-    }),
-  getAllMovie: (limit, offset, searchName, sort) =>
-    new Promise((resolve, reject) => {
-      connection.query(
-        `SELECT * FROM movie WHERE name LIKE '%${searchName}%' ORDER BY name ${sort} LIMIT ${limit} OFFSET ${offset}`,
+        `SELECT * FROM schedule JOIN movie ON schedule.movieId = movie.id WHERE location LIKE '%${searchLocation}%' ORDER BY ${sort} LIMIT ${limit} OFFSET ${offset}`,
         (error, result) => {
           if (!error) {
             resolve(result);
@@ -44,6 +31,52 @@ module.exports = {
     new Promise((resolve, reject) => {
       connection.query(
         "SELECT * FROM schedule WHERE id= ?",
+        id,
+        (error, result) => {
+          if (!error) {
+            resolve(result);
+          } else {
+            reject(new Error(error.sqlMassage));
+          }
+        }
+      );
+    }),
+  createSchedule: (data) =>
+    new Promise((resolve, reject) => {
+      connection.query("INSERT INTO schedule SET ?", data, (error, result) => {
+        if (!error) {
+          const newResult = {
+            id: result.insertId,
+            ...data,
+          };
+          resolve(newResult);
+        } else {
+          reject(new Error(error.sqlMassage));
+        }
+      });
+    }),
+  updateSchedule: (id, data) =>
+    new Promise((resolve, reject) => {
+      connection.query(
+        "UPDATE schedule SET ? WHERE id = ?",
+        [data, id],
+        (error) => {
+          if (!error) {
+            const newResult = {
+              id,
+              ...data,
+            };
+            resolve(newResult);
+          } else {
+            reject(new Error(error.sqlMassage));
+          }
+        }
+      );
+    }),
+  deleteSchedule: (id) =>
+    new Promise((resolve, reject) => {
+      connection.query(
+        "DELETE FROM schedule WHERE id= ?",
         id,
         (error, result) => {
           if (!error) {
