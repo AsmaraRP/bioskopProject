@@ -92,4 +92,17 @@ module.exports = {
         }
       );
     }),
+  getProfit: () =>
+    new Promise((resolve, reject) => {
+      connection.query(
+        "SELECT DAY(createdAt) AS DAY, SUM(totalPayment) FROM booking GROUP BY DAY(createdAt)",
+        (error, result) => {
+          if (!error) {
+            resolve(result);
+          } else {
+            reject(new Error(error.sqlMassage));
+          }
+        }
+      );
+    }),
 };

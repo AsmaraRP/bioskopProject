@@ -109,7 +109,11 @@ module.exports = {
         movieId,
         location
       );
-      return helperWrapper.response(response, 200, "Success get data!", result);
+      const profit = await bookingModel.getProfit();
+      return helperWrapper.response(response, 200, "Success get data!", [
+        result,
+        profit,
+      ]);
     } catch (error) {
       return helperWrapper.response(response, 400, "Bad Request!");
     }
