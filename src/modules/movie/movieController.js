@@ -1,18 +1,9 @@
 const helperWrapper = require("../../helper/wrapper");
 const movieModel = require("./movieModel");
+const redis = require("../../config/redis");
+const cloudinary = require("../../config/cloudinary");
 
 module.exports = {
-  getHello: async (request, response) => {
-    try {
-      //   response.status(200);
-      //   response.send("Hello World");
-      // eslint-disable-next-line prettier/prettier
-   return helperWrapper.response(response, 200, "Success get data!", "HELLO WORLD");
-    } catch (error) {
-      //   console.log(error);
-      return helperWrapper.response(response, 400, "Bad Request!", null);
-    }
-  },
   getAllMovie: async (request, response) => {
     try {
       let { page, limit } = request.query;
@@ -21,7 +12,21 @@ module.exports = {
       page = Number(page);
       limit = Number(limit);
       const offset = page * limit - limit;
-      const totalData = await movieModel.getTotalMovie();
+      let { sort, searchName, searchRelease } = request.query;
+      searchName = searchName || "";
+      sort = sort || "id ASC";
+      searchRelease = searchRelease || "";
+      const result = await movieModel.getAllMovie(
+        limit,
+        offset,
+        searchName,
+        sort,
+        searchRelease
+      );
+      const totalData = await movieModel.getTotalMovie(
+        searchName,
+        searchRelease
+      );
       const totalPage = Math.ceil(totalData / limit);
       const pageInfo = {
         page,
@@ -29,14 +34,10 @@ module.exports = {
         limit,
         totalData,
       };
-      let { sort, searchName } = request.query;
-      searchName = searchName || "";
-      sort = sort || "id ASC";
-      const result = await movieModel.getAllMovie(
-        limit,
-        offset,
-        searchName,
-        sort
+      redis.setEx(
+        `getMovie${JSON.stringify(request.query)}`,
+        3600,
+        JSON.stringify({ result, pageInfo })
       );
       return helperWrapper.response(
         response,
@@ -46,7 +47,6 @@ module.exports = {
         pageInfo
       );
     } catch (error) {
-      console.log(error);
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
   },
@@ -55,12 +55,16 @@ module.exports = {
       const { id } = request.params;
       const result = await movieModel.getMovieById(id);
       if (result.length <= 0) {
-        // eslint-disable-next-line prettier/prettier
-    return helperWrapper.response(response, 404, "Data by Id is not found", null);
+        return helperWrapper.response(
+          response,
+          404,
+          "Data by Id is not found",
+          null
+        );
       }
+      redis.setEx(`getMovie${id}`, 3600, JSON.stringify(result));
       return helperWrapper.response(response, 200, "Success get data!", result);
     } catch (error) {
-      //   console.log(error);
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
   },
@@ -75,9 +79,13 @@ module.exports = {
         duration,
         synopsis,
       } = request.body;
+      const extImage = request.file.mimetype.split("/")[1];
+      const nameImage = request.file.filename;
+      const setImage = `${nameImage}.${extImage}`;
       const setData = {
         name,
         category,
+        image: setImage,
         releaseDate,
         cast,
         director,
@@ -86,10 +94,13 @@ module.exports = {
         createdAt: new Date(Date.now()),
       };
       const result = await movieModel.createMovie(setData);
-      // eslint-disable-next-line prettier/prettier
-   return helperWrapper.response(response, 200, "Success create data Movie!", result);
+      return helperWrapper.response(
+        response,
+        200,
+        "Success create data Movie!",
+        result
+      );
     } catch (error) {
-      //   console.log(error);
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
   },
@@ -98,8 +109,12 @@ module.exports = {
       const { id } = request.params;
       const cekId = await movieModel.getMovieById(id);
       if (cekId.length <= 0) {
-        // eslint-disable-next-line prettier/prettier
-    return helperWrapper.response(response, 404, "Data by Id is not found", null);
+        return helperWrapper.response(
+          response,
+          404,
+          "Data by Id is not found",
+          null
+        );
       }
       const {
         name,
@@ -110,9 +125,18 @@ module.exports = {
         duration,
         synopsis,
       } = request.body;
+      let setImage = cekId[0].image;
+      if (request.file !== undefined) {
+        const prevImage = cekId[0].image.split(".")[0];
+        cloudinary.uploader.destroy(prevImage);
+        const extImage = request.file.mimetype.split("/")[1];
+        const nameImage = request.file.filename;
+        setImage = `${nameImage}.${extImage}`;
+      }
       const setData = {
         name,
         category,
+        image: setImage,
         releaseDate,
         cast,
         director,
@@ -120,7 +144,6 @@ module.exports = {
         synopsis,
         updatedAt: new Date(Date.now()),
       };
-      // eslint-disable-next-line no-restricted-syntax
       for (const data in setData) {
         if (!setData[data]) {
           delete setData[data];
@@ -134,7 +157,6 @@ module.exports = {
         result
       );
     } catch (error) {
-      //   console.log(error);
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
   },
@@ -150,8 +172,9 @@ module.exports = {
           null
         );
       }
+      const prevImage = result[0].image.split(".")[0];
+      cloudinary.uploader.destroy(prevImage);
       const newResult = await movieModel.deleteMovie(id);
-      // tangkap ID, proses pengecekan ID = berada pada database, buat model dengan query, resolve(id), set response
       return helperWrapper.response(
         response,
         200,
@@ -160,7 +183,6 @@ module.exports = {
         newResult.info
       );
     } catch (error) {
-      //   console.log(error);
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
   },

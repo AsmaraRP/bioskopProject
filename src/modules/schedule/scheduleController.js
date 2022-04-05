@@ -1,5 +1,6 @@
 const helperWrapper = require("../../helper/wrapper");
 const scheduleModel = require("./scheduleModel");
+const redis = require("../../config/redis");
 
 module.exports = {
   getAllSchedule: async (request, response) => {
@@ -10,7 +11,22 @@ module.exports = {
       page = Number(page);
       limit = Number(limit);
       const offset = page * limit - limit;
-      const totalData = await scheduleModel.getTotalSchedule();
+      let { searchLocation, sort, searchByMovieId } = request.query;
+      searchLocation = searchLocation || "";
+      sort = sort || "schedule.id ASC";
+      searchByMovieId =
+        searchByMovieId !== undefined ? `&& movieId = ${searchByMovieId}` : "";
+      const result = await scheduleModel.getAllSchedule(
+        limit,
+        offset,
+        searchLocation,
+        sort,
+        searchByMovieId
+      );
+      const totalData = await scheduleModel.getTotalSchedule(
+        searchLocation,
+        searchByMovieId
+      );
       const totalPage = Math.ceil(totalData / limit);
       const pageInfo = {
         page,
@@ -18,14 +34,10 @@ module.exports = {
         limit,
         totalData,
       };
-      let { searchLocation, sort } = request.query;
-      searchLocation = searchLocation || "";
-      sort = sort || "schedule.id ASC";
-      const result = await scheduleModel.getAllSchedule(
-        limit,
-        offset,
-        searchLocation,
-        sort
+      redis.setEx(
+        `getSchedule${JSON.stringify(request.query)}`,
+        3600,
+        JSON.stringify({ result, pageInfo })
       );
       return helperWrapper.response(
         response,
@@ -43,12 +55,16 @@ module.exports = {
       const { id } = request.params;
       const result = await scheduleModel.getScheduleById(id);
       if (result.length <= 0) {
-        // eslint-disable-next-line prettier/prettier
-    return helperWrapper.response(response, 404, "Data by Id is not found", null);
+        return helperWrapper.response(
+          response,
+          404,
+          "Data by Id is not found",
+          null
+        );
       }
+      redis.setEx(`getSchedule${id}`, 3600, JSON.stringify(result));
       return helperWrapper.response(response, 200, "Success get data!", result);
     } catch (error) {
-      //   console.log(error);
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
   },
@@ -67,10 +83,13 @@ module.exports = {
         createdAt: new Date(Date.now()),
       };
       const result = await scheduleModel.createSchedule(setData);
-      // eslint-disable-next-line prettier/prettier
-   return helperWrapper.response(response, 200, "Success create data Schedule!", result);
+      return helperWrapper.response(
+        response,
+        200,
+        "Success create data Schedule!",
+        result
+      );
     } catch (error) {
-      //   console.log(error);
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
   },
@@ -79,8 +98,12 @@ module.exports = {
       const { id } = request.params;
       const cekId = await scheduleModel.getScheduleById(id);
       if (cekId.length <= 0) {
-        // eslint-disable-next-line prettier/prettier
-    return helperWrapper.response(response, 404, "Data by Id is not found", null);
+        return helperWrapper.response(
+          response,
+          404,
+          "Data by Id is not found",
+          null
+        );
       }
       const { movieId, premiere, price, location, dateStart, dateEnd, time } =
         request.body;
@@ -94,7 +117,6 @@ module.exports = {
         time,
         updatedAt: new Date(Date.now()),
       };
-      // eslint-disable-next-line no-restricted-syntax
       for (const data in setData) {
         if (!setData[data]) {
           delete setData[data];
@@ -108,7 +130,6 @@ module.exports = {
         result
       );
     } catch (error) {
-      console.log(error);
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
   },
@@ -125,7 +146,6 @@ module.exports = {
         );
       }
       const newResult = await scheduleModel.deleteSchedule(id);
-      // tangkap ID, proses pengecekan ID = berada pada database, buat model dengan query, resolve(id), set response
       return helperWrapper.response(
         response,
         200,
@@ -134,7 +154,6 @@ module.exports = {
         newResult.info
       );
     } catch (error) {
-      //   console.log(error);
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
   },

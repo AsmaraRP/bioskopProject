@@ -5,6 +5,7 @@ module.exports = {
   createBooking: async (request, response) => {
     try {
       const {
+        userId,
         scheduleId,
         dateBooking,
         timeBooking,
@@ -14,6 +15,7 @@ module.exports = {
       } = request.body;
       const totalTicket = seat.length;
       const setData = {
+        userId,
         scheduleId,
         dateBooking,
         timeBooking,
@@ -30,14 +32,14 @@ module.exports = {
         item,
         new Date(Date.now()),
       ]);
-
-      console.log(setDataSeat);
       await bookingModel.createBookingSeat(setDataSeat);
-
-      // eslint-disable-next-line prettier/prettier
-       return helperWrapper.response(response, 200, "Success create data Booking!", result);
+      return helperWrapper.response(
+        response,
+        200,
+        "Success create data Booking!",
+        result
+      );
     } catch (error) {
-      console.log(error);
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
   },
@@ -46,12 +48,32 @@ module.exports = {
       const { id } = request.params;
       const result = await bookingModel.getBookingById(id);
       if (result.length <= 0) {
-        // eslint-disable-next-line prettier/prettier
-    return helperWrapper.response(response, 404, "Data by Id is not found", null);
+        return helperWrapper.response(
+          response,
+          404,
+          "Data by Id is not found",
+          null
+        );
       }
       return helperWrapper.response(response, 200, "Success get data!", result);
     } catch (error) {
-      //   console.log(error);
+      return helperWrapper.response(response, 400, "Bad Request!", null);
+    }
+  },
+  getBookingByUserId: async (request, response) => {
+    try {
+      const { id } = request.params;
+      const result = await bookingModel.getBookingByUserId(id);
+      if (result.length <= 0) {
+        return helperWrapper.response(
+          response,
+          404,
+          "Data by Id is not found",
+          null
+        );
+      }
+      return helperWrapper.response(response, 200, "Success get data!", result);
+    } catch (error) {
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
   },
@@ -63,10 +85,8 @@ module.exports = {
         dateBooking,
         timeBooking
       );
-
       return helperWrapper.response(response, 200, "Success get data!", result);
     } catch (error) {
-      //   console.log(error);
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
   },
@@ -75,11 +95,14 @@ module.exports = {
       const { id } = request.params;
       const cekId = await bookingModel.getBookingById(id);
       if (cekId.length <= 0) {
-        // eslint-disable-next-line prettier/prettier
-    return helperWrapper.response(response, 404, "Ticket is not found", null);
+        return helperWrapper.response(
+          response,
+          404,
+          "Ticket is not found",
+          null
+        );
       }
       const setData = { statusUsed: "used" };
-      // eslint-disable-next-line no-restricted-syntax
       for (const data in setData) {
         if (!setData[data]) {
           delete setData[data];
@@ -93,7 +116,6 @@ module.exports = {
         result
       );
     } catch (error) {
-      //   console.log(error);
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
   },
@@ -103,7 +125,6 @@ module.exports = {
       scheduleId = scheduleId || 1;
       movieId = movieId || 1;
       location = location || "";
-
       const result = await bookingModel.getDashboardBooking(
         scheduleId,
         movieId,
