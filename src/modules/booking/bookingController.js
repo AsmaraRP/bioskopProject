@@ -163,14 +163,13 @@ module.exports = {
           // capture only applies to card transaction, which you need to check for the fraudStatus
           if (fraudStatus == 'challenge'){
               // TODO set transaction status on your databaase to 'challenge'
-              return console.log('Paymant cannot be used');
           } else if (fraudStatus == 'accept'){
               // TODO set transaction status on your databaase to 'success'
               const setData = {
                 paymentMethod: result.payment_type,
                 statusPayment: "SUCCESS"
-              }
-              return console.log(`Payment Success, id : ${orderId} and for data: ${JSON.stringify(setData)}`)
+              };
+              console.log(`PAYMENT SUCCECC by id ${orderId} and ${JSON.stringify(setData)}`);
           }
       } else if (transactionStatus == 'settlement'){
           // TODO set transaction status on your databaase to 'success'
@@ -178,18 +177,15 @@ module.exports = {
             paymentMethod: result.payment_type,
             statusPayment: "SUCCESS"
           };
-          return console.log(`Payment Success, id : ${orderId} and for data: ${JSON.stringify(setData)}`)
+          console.log(`PAYMENT SUCCECC by id ${orderId} and ${JSON.stringify(setData)}`);
       } else if (transactionStatus == 'deny'){
           // TODO you can ignore 'deny', because most of the time it allows payment retries
           // and later can become success
-          return console.log('Paymant cannot be used');
       } else if (transactionStatus == 'cancel' ||
         transactionStatus == 'expire'){
           // TODO set transaction status on your databaase to 'failure'
-          return console.log('Paymant cannot be continued, please try again');
       } else if (transactionStatus == 'pending'){
           // TODO set transaction status on your databaase to 'pending' / waiting payment
-          return console.log('Paymant still panding');
       }
     } catch(error){
       return helperWrapper.response(response,400,"Bad Request!");
