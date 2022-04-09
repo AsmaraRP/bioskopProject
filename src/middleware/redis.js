@@ -97,4 +97,17 @@ module.exports = {
       return helperWrapper.response(response, 400, error.message, null);
     }
   },
+  clearSchceduleRedis: async (request, response, next) => {
+    try {
+      const keys = await redis.keys("getSchedule*");
+      if (keys.length > 0) {
+        keys.forEach(async (element) => {
+          await redis.del(element);
+        });
+      }
+      return next();
+    } catch (error) {
+      return helperWrapper.response(response, 400, error.message, null);
+    }
+  },
 };
