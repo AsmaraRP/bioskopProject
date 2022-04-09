@@ -13,11 +13,15 @@ const OAuth2Client = new OAuth2(clientId, clientSecret);
 OAuth2Client.setCredentials({
   refresh_token: refreshToken,
 });
+console.log(clientId);
+console.log(clientSecret);
+console.log(refreshToken);
 
 module.exports = {
   sendMail: (data) =>
     new Promise((resolve, reject) => {
       const accessToken = OAuth2Client.getAccessToken;
+      console.log(data);
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {

@@ -39,7 +39,7 @@ module.exports = {
         subject: "Email Verification !",
         name: firstName,
         template: 'verificationEmail.html',
-        buttonUrl: result[0].id,
+        buttonUrl: setData.id,
       }
       const resultSendMail = await sendMail(setSendEmail);
       console.log(resultSendMail)
