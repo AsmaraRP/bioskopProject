@@ -19,9 +19,9 @@ module.exports = {
         snap.createTransaction(parameter)
             .then((transaction)=>{
                 // transaction token
-                let transactionToken = transaction.token;
-                console.log(transaction);
-                console.log('transactionToken:',transactionToken);
+                // let transactionToken = transaction.token;
+                // console.log(transaction);
+                // console.log('transactionToken:',transactionToken);
                 resolve(transaction);
             }).catch((error) => {
                 reject(error);
@@ -30,7 +30,6 @@ module.exports = {
     notif : (data)=> new Promise((resolve,reject) =>{
     snap.transaction.notification(data)
     .then((statusResponse)=>{
-        console.log(statusResponse);
         resolve(statusResponse);
     }).catch((error) => {
         reject(error);

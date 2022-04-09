@@ -39,7 +39,7 @@ module.exports = {
         subject: "Email Verification !",
         name: firstName,
         template: 'verificationEmail.html',
-        buttonUrl: "google.com"
+        buttonUrl: `https://project-fw6rifang.herokuapp.com/activation/${result[0].id}`
       }
       const resultSendMail = await sendMail(setSendEmail);
       console.log(resultSendMail)
