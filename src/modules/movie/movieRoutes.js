@@ -15,6 +15,7 @@ Router.get(
 Router.post(
   "/",
   middlewareAuth.isAdmin,
+  middlewareRedis.clearMovieRedis,
   middlewareUploadMovie,
   movieController.createMovie
 );
