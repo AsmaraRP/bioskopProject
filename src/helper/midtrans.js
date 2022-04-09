@@ -1,8 +1,10 @@
 const midtransClient = require("midtrans-client");
+const dotenv = require("dotenv");
+dotenv.config();
 const snap = new midtransClient.Snap({
-    isProducions: false,
-    serverKey: "SB-Mid-server-WaAS3iCPDOFK0WhAK1KtysMO",
-    clientKey: "SB-Mid-client-OHcs5afUmRBuLFzB",
+    isProducions: process.env.MIDTRANS_PRODUCTION === "true" ,
+    serverKey: process.env.MIDTRANS_SERVER_KEY,
+    clientKey: process.env.MIDTRANS_CLIENT_KEY,
 })
 module.exports = {
     post: (data) => new Promise((resolve, reject) =>{
