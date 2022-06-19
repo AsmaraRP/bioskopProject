@@ -4,7 +4,7 @@ const helperWrapper = require("../../helper/wrapper");
 const authModel = require("./authModel");
 const { sendMail } = require("../../helper/mail");
 const redis = require("../../config/redis");
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require("uuid");
 
 module.exports = {
   register: async (request, response) => {
@@ -15,15 +15,10 @@ module.exports = {
       // email verivication
       const checkUser = await authModel.getUserByEmail(email);
       if (checkUser.length > 0) {
-        return helperWrapper.response(
-          response,
-          409,
-          "Email has been registed",
-          null
-        );
+        return helperWrapper.response(response, 409, "Email has been registed", null);
       }
       const setData = {
-        id : uuidv4(),
+        id: uuidv4(),
         firstName,
         lastName,
         image: "",
@@ -38,11 +33,11 @@ module.exports = {
         to: email,
         subject: "Email Verification !",
         name: firstName,
-        template: 'verificationEmail.html',
+        template: "verificationEmail.html",
         buttonUrl: setData.id,
-      }
-      const resultSendMail = await sendMail(setSendEmail);
-      console.log(resultSendMail)
+      };
+      // const resultSendMail = await sendMail(setSendEmail);
+      // console.log(resultSendMail);
       return helperWrapper.response(response, 200, "Succsess Register", result);
     } catch (error) {
       return helperWrapper.response(response, 400, "Bad Request!", null);
@@ -53,23 +48,13 @@ module.exports = {
       const { email, password } = request.body;
       const checkUser = await authModel.getUserByEmail(email);
       if (checkUser.length < 1) {
-        return helperWrapper.response(
-          response,
-          404,
-          "Email not registed!",
-          null
-        );
+        return helperWrapper.response(response, 404, "Email not registed!", null);
       }
       if (!bcrypt.compareSync(password, checkUser[0].password)) {
         return helperWrapper.response(response, 401, "Wrong Password!", null);
       }
       if (checkUser[0].status !== "active") {
-        return helperWrapper.response(
-          response,
-          401,
-          "Please Activate your account",
-          null
-        );
+        return helperWrapper.response(response, 401, "Please Activate your account", null);
       }
       // JWT Prossecing
       const payload = checkUser[0];
@@ -92,12 +77,7 @@ module.exports = {
       const { id } = request.params;
       const data = { status: "active" };
       const result = await authModel.activation(id, data);
-      return helperWrapper.response(
-        response,
-        200,
-        "Succsess Activation",
-        result
-      );
+      return helperWrapper.response(response, 200, "Succsess Activation", result);
     } catch (error) {
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
@@ -107,12 +87,7 @@ module.exports = {
       const { refreshToken } = request.body;
       const checkToken = await redis.get(`refreshToken:${refreshToken}`);
       if (checkToken) {
-        return helperWrapper.response(
-          response,
-          403,
-          "Your refresh token cannot be used",
-          null
-        );
+        return helperWrapper.response(response, 403, "Your refresh token cannot be used", null);
       }
       jwt.verify(refreshToken, "RAHASIABARU", async (error, result) => {
         delete result.iat;
@@ -121,11 +96,7 @@ module.exports = {
         const newRefreshToken = jwt.sign(result, "RAHASIABARU", {
           expiresIn: "24h",
         });
-        await redis.setEx(
-          `refreshToken:${refreshToken}`,
-          3600 * 48,
-          refreshToken
-        );
+        await redis.setEx(`refreshToken:${refreshToken}`, 3600 * 48, refreshToken);
         return helperWrapper.response(response, 200, "Success refresh token", {
           id: result.id,
           token,

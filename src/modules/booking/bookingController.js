@@ -169,7 +169,7 @@ module.exports = {
                 paymentMethod: result.payment_type,
                 statusPayment: "SUCCESS"
               };
-              console.log(`PAYMENT SUCCECC by id ${orderId} and ${JSON.stringify(setData)}`);
+              console.log(`PAYMENT SUCCESS by id ${orderId} and ${JSON.stringify(setData)}`);
           }
       } else if (transactionStatus == 'settlement'){
           // TODO set transaction status on your databaase to 'success'
@@ -177,7 +177,7 @@ module.exports = {
             paymentMethod: result.payment_type,
             statusPayment: "SUCCESS"
           };
-          console.log(`PAYMENT SUCCECC by id ${orderId} and ${JSON.stringify(setData)}`);
+          console.log(`PAYMENT SUCCESS by id ${orderId} and ${JSON.stringify(setData)}`);
       } else if (transactionStatus == 'deny'){
           // TODO you can ignore 'deny', because most of the time it allows payment retries
           // and later can become success

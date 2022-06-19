@@ -9,12 +9,7 @@ module.exports = {
       const { id } = request.params;
       const result = await userModel.getUserByUserId(id);
       if (result.length <= 0) {
-        return helperWrapper.response(
-          response,
-          404,
-          "Data user by Id is not found",
-          null
-        );
+        return helperWrapper.response(response, 404, "Data user by Id is not found", null);
       }
       return helperWrapper.response(response, 200, "Success get data!", result);
     } catch (error) {
@@ -26,18 +21,15 @@ module.exports = {
       const { id } = request.params;
       const cekId = await userModel.getUserByUserId(id);
       if (cekId.length <= 0) {
-        return helperWrapper.response(
-          response,
-          404,
-          "Data by Id is not found",
-          null
-        );
+        return helperWrapper.response(response, 404, "Data by Id is not found", null);
       }
-      const { firstName, lastName, noTelp } = request.body;
+      const { firstName, lastName, noTelp, email } = request.body;
       const setData = {
         firstName,
         lastName,
         noTelp,
+        email,
+        role,
         updatedAt: new Date(Date.now()),
       };
       for (const data in setData) {
@@ -46,12 +38,7 @@ module.exports = {
         }
       }
       const result = await userModel.updateProfile(id, setData);
-      return helperWrapper.response(
-        response,
-        200,
-        "Success Updating Profile!",
-        result
-      );
+      return helperWrapper.response(response, 200, "Success Updating Profile!", result);
     } catch (error) {
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
@@ -61,12 +48,7 @@ module.exports = {
       const { id } = request.params;
       const cekId = await userModel.getUserByUserId(id);
       if (cekId.length <= 0) {
-        return helperWrapper.response(
-          response,
-          404,
-          "Data user by Id is not found",
-          null
-        );
+        return helperWrapper.response(response, 404, "Data user by Id is not found", null);
       }
       let setImage = cekId[0].image;
       if (request.file !== undefined) {
@@ -81,12 +63,7 @@ module.exports = {
         updatedAt: new Date(Date.now()),
       };
       const result = await userModel.updateProfile(id, data);
-      return helperWrapper.response(
-        response,
-        200,
-        "Success Updating Image!",
-        result
-      );
+      return helperWrapper.response(response, 200, "Success Updating Image!", result);
     } catch (error) {
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
@@ -96,33 +73,18 @@ module.exports = {
       const { id } = request.params;
       const cekId = await userModel.getUserByUserId(id);
       if (cekId.length <= 0) {
-        return helperWrapper.response(
-          response,
-          404,
-          "Data by Id is not found",
-          null
-        );
+        return helperWrapper.response(response, 404, "Data by Id is not found", null);
       }
       const { newPassword, confirmPassword } = request.body;
       if (newPassword !== confirmPassword) {
-        return helperWrapper.response(
-          response,
-          401,
-          "confirmation Password is incorrect",
-          null
-        );
+        return helperWrapper.response(response, 401, "confirmation Password is incorrect", null);
       }
       const setData = {
         password: bcrypt.hashSync(newPassword, 10),
         updatedAt: new Date(Date.now()),
       };
       const result = await userModel.updateProfile(id, setData);
-      return helperWrapper.response(
-        response,
-        200,
-        "Success Updating Password!",
-        result
-      );
+      return helperWrapper.response(response, 200, "Success Updating Password!", result);
     } catch (error) {
       return helperWrapper.response(response, 400, "Bad Request!", null);
     }
