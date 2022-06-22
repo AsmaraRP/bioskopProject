@@ -2,10 +2,9 @@ const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 const fs = require("fs");
 const mustache = require("mustache");
-const dotenv = require("dotenv");
-dotenv.config();
+require("dotenv").config();
 
-const clientId =process.env.MAIL_CLIENT_ID;
+const clientId = process.env.MAIL_CLIENT_ID;
 const clientSecret = process.env.MAIL_CLIENT_SECRET;
 const refreshToken = process.env.MAIL_REFRESH_TOKEN;
 const { OAuth2 } = google.auth;
@@ -30,10 +29,7 @@ module.exports = {
         },
       });
 
-      const fileTemplate = fs.readFileSync(
-        `src/templates/email/${data.template}`,
-        "utf8"
-      );
+      const fileTemplate = fs.readFileSync(`src/templates/email/${data.template}`, "utf8");
 
       const mailOptions = {
         from: '"BIOSKOP PROJECT" <bioskopproject1@gmail.com>',
