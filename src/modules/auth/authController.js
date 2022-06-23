@@ -36,7 +36,7 @@ module.exports = {
         template: "verificationEmail.html",
         buttonUrl: setData.id,
       };
-      const resultSendMail = await sendMail(setSendEmail);
+      // const resultSendMail = await sendMail(setSendEmail);
       // console.log(resultSendMail);
       return helperWrapper.response(response, 200, "Succsess Register", result);
     } catch (error) {
