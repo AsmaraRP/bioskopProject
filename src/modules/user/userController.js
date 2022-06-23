@@ -23,13 +23,11 @@ module.exports = {
       if (cekId.length <= 0) {
         return helperWrapper.response(response, 404, "Data by Id is not found", null);
       }
-      const { firstName, lastName, noTelp, email } = request.body;
+      const { firstName, lastName, noTelp } = request.body;
       const setData = {
         firstName,
         lastName,
         noTelp,
-        email,
-        role,
         updatedAt: new Date(Date.now()),
       };
       for (const data in setData) {
